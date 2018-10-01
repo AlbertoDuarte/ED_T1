@@ -6,23 +6,23 @@
 
 #define VAZIO -1
 
-typedef struct elementoP {
-    struct elementoP* proximo;
+typedef struct elementoPI {
+    struct elementoPI* proximo;
     int dado;
-}elementoP;
+}elementoPI;
 
 typedef struct pilhaI {
-    elementoP* topo;
+    elementoPI* topo;
 }pilhaI;
 
-pilhaI* criarPilha() {
+pilhaI* criarPilhaI() {
     pilhaI* p = (pilhaI*)malloc(sizeof(pilhaI ));
     p->topo = NULL;
     return p;
 }
 
 void empilharI(pilhaI * p, int n) {
-    elementoP* novo = (elementoP*)malloc(sizeof(elementoP));
+    elementoPI* novo = (elementoPI*)malloc(sizeof(elementoPI));
     
     novo->dado = n;
     novo->proximo = p->topo;
@@ -39,7 +39,7 @@ int lerTopoI(pilhaI * p) {
 
 int desempilharI(pilhaI * p) {
     int tmp_dado;
-    elementoP* tmp;
+    elementoPI* tmp;
     
     if(p->topo == NULL) {
         printf("Pilha n possui valores\n");

@@ -26,79 +26,115 @@ int verificarPrioridade(char c) {
     }
 }
 
+char* charParaString(char c) {
+    char* buffer = (char*) malloc(sizeof(char)*2);
+    buffer[0] = c;
+    buffer[1] = '\0';
+    return buffer;
+}
+
 lista* paraPosfixo() {
-    char buffer[1000000];
-    int i, operador, prioridade, valido = 1;
+    char bufferexpressao[1000000], *buffern; /* buffer da expressao */
+    int i, valido = 1, digitosbuffer = 0, qt_op = 0;
+    char operador, prioridade, tmp;
     lista* expressao = criarLista();
-    pilhaC* operadores = criarPilha();
+    pilhaC* operadores = criarPilhaC();
     
-    scanf("%[^\n]", buffer);
+    scanf("%[^\n]", bufferexpressao);
 
     
-    for(i = 0; buffer[i] != '\0' && valido; i++) {
-        operador = buffer[i];
+    for(i = 0; bufferexpressao[i] != '\0' && valido; i++) {
+        operador = bufferexpressao[i];
         prioridade = verificarPrioridade(operador);
         
 
         /* prioridade 0 -> operando
          * prioridade -1 -> espaco
            so pode haver 1 espaco consecutivo */
-        if( (prioridade == -1 && expressao->fim->dado != ' ') || prioridade == 0) {
-            adicionarFinal(expressao, operador);
-        }
-        
-        else if(prioridade == -1) {
-            printf("pnc\n");
-        }
-        
-        /* Se encontrar fechamento do parenteses, desempilhar ate achar a abertura */
-        else if(prioridade == 4) {
-            adicionarFinal(expressao, ' ');
-            operador = desempilharC(operadores);
-            prioridade = verificarPrioridade(operador);
-            
-            while(prioridade != 3 && operador != VAZIO) {
-                adicionarFinal(expressao, operador);
-                operador = desempilharC(operadores);
-                prioridade = verificarPrioridade(operador);
+        if( prioridade == 0 ) {
+            if(digitosbuffer == 0) {
+                buffern = (char*) malloc(sizeof(char)*1000); /* buffer de numero */
             }
-            /* Caso o ultimo operador nao tenha sido parenteses a expressao e invalida */
-            if(prioridade != 3) {
-                printf("buceta");
+            buffern [digitosbuffer] = operador;
+            digitosbuffer++;
+            qt_op = 0;
+        }
+        
+        else if(prioridade != -1) {
+            if(prioridade == 1 || prioridade == 2) {
+                qt_op++;
+            }
+            /* 2 ou mais operadores consecutivos != de parenteses invalida a expressao */
+            if(qt_op >= 2) {
                 valido = 0;
             }
-        }
-        /* Se operador encontrado > operador do topo, empilhar */
-        else if(!pilhaVaziaC(operadores) && prioridade > verificarPrioridade(lerTopoC(operadores)) ) {
-            empilharC(operadores, operador);
-        }
-        
-        /* Se operador encontrado <= operador do topo, desempilhar */
-        else {
-            while(!pilhaVaziaC(operadores) && prioridade <= verificarPrioridade(lerTopoC(operadores)) && verificarPrioridade(lerTopoC(operadores)) != 3 ) {
-                adicionarFinal(expressao, desempilharC(operadores));
+            
+            /* caso haja numero com mais de um digito, transforma para inteiro e coloca na lista de expressao infixa */
+            if(digitosbuffer > 0) {
+                buffern[digitosbuffer] = '\0';
+                adicionarFinal(expressao, buffern);
+                digitosbuffer = 0;
+                printf("adicionando %s a lista expressao\n", buffern);
             }
-            empilharC(operadores, operador);
+            
+            /* Se encontrar fechamento do parenteses, desempilhar ate achar a abertura */
+            if(prioridade == 4) {
+                operador = desempilharC(operadores);
+                prioridade = verificarPrioridade(operador);
+                
+                while(prioridade != 3 && operador != VAZIO) {
+                    printf("adicionando %c a expressao\n", operador);
+                    adicionarFinal(expressao, charParaString(operador));
+                    operador = desempilharC(operadores);
+                    prioridade = verificarPrioridade(operador);
+                }
+                /* Caso o ultimo operador nao tenha sido parenteses a expressao e invalida */
+                if(prioridade != 3) {
+                    valido = 0;
+                }
+            }
+            /* Se operador encontrado > operador do topo, empilhar */
+            else if(!pilhaVaziaC(operadores) && prioridade > verificarPrioridade(lerTopoC(operadores)) ) {
+                empilharC(operadores, operador);
+            }
+            
+            /* Se operador encontrado <= operador do topo, desempilhar */
+            else {
+                while(!pilhaVaziaC(operadores) && prioridade <= verificarPrioridade(lerTopoC(operadores)) && verificarPrioridade(lerTopoC(operadores)) != 3 ) {
+                    tmp = desempilharC(operadores);
+                    printf("adicionando %c a expressao\n", tmp);
+                    adicionarFinal(expressao, charParaString(tmp));
+                }
+                empilharC(operadores, operador);
+            }
         }
     }
     
-    while(!pilhaVaziaC(operadores)) {
-        adicionarFinal(expressao, ' ');
-        adicionarFinal(expressao, desempilharC(operadores));
+    /* caso haja numero com mais de um digito, transforma para inteiro e coloca na lista de expressao infixa */
+    if(digitosbuffer > 0) {
+        buffern[digitosbuffer] = '\0';
+        adicionarFinal(expressao, buffern);
+        printf("adicionando %s a lista expressao\n", buffern);
+    }
+    /* desempilha o resto dos operadores */
+    while(!pilhaVaziaC(operadores) && valido) {
+        tmp = desempilharC(operadores);
+        if(tmp == '(') {
+            valido = 0;
+        }
+        else {
+            printf("adicionando operador %c a expressao\n", tmp);
+            adicionarFinal(expressao, charParaString(tmp));
+        }
     }
     
-    if(valido) {
-        return expressao;
+    if(!valido) {
+        printf("Expressao invalida!!!\n");
+        expressao = NULL; /* TODO: dar free na expressao */
     }
-    return;
+    return expressao;
 }
 
-lista *avaliarPosfixo(lista* expressao) {
-    elemento = expressao->inicio;
-    while(elemento != NULL) {
-        
-    }   
-}
 
 int main() {
     lista* l = paraPosfixo();

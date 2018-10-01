@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 typedef struct elemento {
-    char dado;
+    char* dado;
     struct elemento* proximo;
 }elemento;
 
@@ -14,7 +14,7 @@ typedef struct lista {
 void printLista(lista* l) {
     elemento* tmp = l->inicio;
     while(tmp != NULL) {
-        printf("%c", tmp->dado);
+        printf("%s", tmp->dado);
         tmp = tmp->proximo;
     }
     printf("\n");
@@ -28,7 +28,7 @@ lista* criarLista() {
     return l;
 }
 
-int adicionarInicio(lista* l, int n) {
+int adicionarInicio(lista* l, char* n) {
     elemento* novo = (elemento*)malloc(sizeof(elemento));
     novo->dado = n;
     novo->proximo = l->inicio;
@@ -40,7 +40,7 @@ int adicionarInicio(lista* l, int n) {
     return 0;
 }
 
-int adicionarFinal(lista* l, int n) {
+int adicionarFinal(lista* l, char* n) {
     elemento* novo = (elemento*)malloc(sizeof(elemento));
     novo->dado = n;
     novo->proximo = NULL;
@@ -57,7 +57,7 @@ int adicionarFinal(lista* l, int n) {
     return 0;
 }
 
-int adicionar(lista* l, int n, int pos) {
+int adicionar(lista* l, char* n, int pos) {
     int i;
     
     if(pos < 0) {
@@ -96,7 +96,7 @@ int adicionar(lista* l, int n, int pos) {
     return 0;
 }
 
-int trocarValor(lista* l, int n, int pos) {
+int trocarValor(lista* l, char* n, int pos) {
     int i;
     
     if(pos < 0) {
