@@ -33,14 +33,12 @@ char* charParaString(char c) {
     return buffer;
 }
 
-lista* paraPosfixo() {
-    char bufferexpressao[1000000], *buffern; /* buffer da expressao */
+lista* paraPosfixo(char* bufferexpressao) {
+    char *buffern; /* buffer da expressao */
     int i, valido = 1, digitosbuffer = 0, qt_op = 0;
     char operador, prioridade, tmp;
     lista* expressao = criarLista();
     pilhaC* operadores = criarPilhaC();
-    
-    scanf("%[^\n]", bufferexpressao);
     
     /* verifica invalidez por falta de operandos no inicio */
     prioridade = verificarPrioridade(bufferexpressao[0]);
@@ -69,7 +67,7 @@ lista* paraPosfixo() {
             if(prioridade == 1 || prioridade == 2) {
                 qt_op++;
             }
-            /* 2 ou mais operadores consecutivos != de parenteses invalida a expressao */
+            /* 2 ou mais operadores consecutivos diferente de parenteses invalida a expressao */
             if(qt_op >= 2) {
                 valido = 0;
             }
@@ -119,7 +117,6 @@ lista* paraPosfixo() {
     if(prioridade == 1 || prioridade == 2) {
         valido = 0;
     }
-    
     /* caso ainda haja numero com mais de um digito, transforma para inteiro e coloca na lista de expressao infixa */
     if(digitosbuffer > 0) {
         buffern[digitosbuffer] = '\0';
@@ -139,7 +136,6 @@ lista* paraPosfixo() {
     }
     
     freePilhaC(operadores); // liberar pilha de operadores da memoria
-    
     if(!valido) {
         printf("Expressao invalida!!!\n");
         freeLista(expressao);
@@ -150,10 +146,14 @@ lista* paraPosfixo() {
 
 
 int main() {
-    lista* l = paraPosfixo();
+    /* recebe expressao infixa do usuario */
+    char bufferexpressao[1000000];
+    scanf("%[^\n]", bufferexpressao);
+    
+    lista* l = paraPosfixo(bufferexpressao);
     if(l!= NULL) {
-        freeLista(l);
         printLista(l);
+        freeLista(l);
     }
 
     return 0;
