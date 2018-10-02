@@ -59,3 +59,11 @@ int pilhaVaziaC(pilhaC * p) {
     }
     return 0;
 }
+
+void freePilhaC(pilhaC* p) {
+    while(lerTopoC(p) != VAZIO) {
+        desempilharC(p);
+    }
+    free(p);
+    
+}

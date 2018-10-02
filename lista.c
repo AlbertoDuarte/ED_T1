@@ -151,3 +151,17 @@ int removerFim(lista *l) {
     
     return 0;
 }
+
+void freeLista(lista* l) {
+    elemento* atual = l->inicio;
+    elemento* proximo = atual->proximo;
+    while(proximo!=NULL) {
+        free(atual->dado);
+        free(atual);
+        atual = proximo;
+        proximo = atual->proximo;
+    }
+    free(atual->dado);
+    free(atual);
+    free(l);
+}
