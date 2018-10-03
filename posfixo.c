@@ -37,8 +37,8 @@ lista* paraPosfixo(char* bufferexpressao) {
     char *buffern; /* buffer da expressao */
     int i, valido = 1, digitosbuffer = 0, qt_op = 0;
     char operador, prioridade, tmp;
-    lista* expressao = criarLista();
-    pilhaC* operadores = criarPilhaC();
+    lista* expressao = criarLista(); /* custo 4 */
+    pilhaC* operadores = criarPilhaC(); /* custo 3  */
     
     /* verifica invalidez por falta de operandos no inicio */
     prioridade = verificarPrioridade(bufferexpressao[0]);
@@ -77,7 +77,6 @@ lista* paraPosfixo(char* bufferexpressao) {
                 buffern[digitosbuffer] = '\0';
                 adicionarFinal(expressao, buffern);
                 digitosbuffer = 0;
-                printf("adicionando %s a lista expressao\n", buffern);
             }
             
             /* Se encontrar fechamento do parenteses, desempilhar ate achar a abertura */
@@ -86,7 +85,6 @@ lista* paraPosfixo(char* bufferexpressao) {
                 prioridade = verificarPrioridade(operador);
                 
                 while(prioridade != 3 && operador != VAZIO) {
-                    printf("adicionando %c a expressao\n", operador);
                     adicionarFinal(expressao, charParaString(operador));
                     operador = desempilharC(operadores);
                     prioridade = verificarPrioridade(operador);
@@ -105,7 +103,6 @@ lista* paraPosfixo(char* bufferexpressao) {
             else {
                 while(!pilhaVaziaC(operadores) && prioridade <= verificarPrioridade(lerTopoC(operadores)) && verificarPrioridade(lerTopoC(operadores)) != 3 ) {
                     tmp = desempilharC(operadores);
-                    printf("adicionando %c a expressao\n", tmp);
                     adicionarFinal(expressao, charParaString(tmp));
                 }
                 empilharC(operadores, operador);
@@ -121,7 +118,6 @@ lista* paraPosfixo(char* bufferexpressao) {
     if(digitosbuffer > 0) {
         buffern[digitosbuffer] = '\0';
         adicionarFinal(expressao, buffern);
-        printf("adicionando %s a lista expressao\n", buffern);
     }
     /* desempilha o resto dos operadores */
     while(!pilhaVaziaC(operadores) && valido) {
@@ -130,29 +126,71 @@ lista* paraPosfixo(char* bufferexpressao) {
             valido = 0;
         }
         else {
-            printf("adicionando operador %c a expressao\n", tmp);
             adicionarFinal(expressao, charParaString(tmp));
         }
     }
     
     freePilhaC(operadores); // liberar pilha de operadores da memoria
     if(!valido) {
-        printf("Expressao invalida!!!\n");
+        printf("Expressao invalida!\n");
         freeLista(expressao);
-        expressao = NULL; /* TODO: dar free na expressao */
+        expressao = NULL;
     }
     return expressao;
+}
+
+int avaliarPosfixo(lista* expressao) {
+    int valor, valor2;
+    pilhaI* operandos = criarPilhaI();
+    elemento* atual = expressao->inicio;
+    
+    while(atual != NULL) {
+        /* caso o elemento atual seja um operador */
+        if(verificarPrioridade((atual->dado)[0]) >= 1) {
+            valor = desempilharI(operandos);
+            valor2 = desempilharI(operandos);
+            if((atual->dado)[0] == '+') { 
+                empilharI(operandos, valor2+valor);
+            }
+            else if((atual->dado)[0] == '-') { 
+                empilharI(operandos, valor2-valor);
+            }
+            else if((atual->dado)[0] == '*') { 
+                empilharI(operandos, valor2*valor);
+            }
+            else if((atual->dado)[0] == '/') { 
+                empilharI(operandos, valor2/valor);
+            }
+            
+            else {
+                empilharI(operandos, -999999);
+            }
+        }
+        /* caso o elemento atual seja uma string representando um número */
+        else {
+            valor = atoi(atual->dado); // converte para int
+            empilharI(operandos, valor);
+        }
+        atual = atual->proximo;
+    }
+    valor = desempilharI(operandos);
+    freePilhaI(operandos);
+    return valor;
 }
 
 
 int main() {
     /* recebe expressao infixa do usuario */
+    int valor;
     char bufferexpressao[1000000];
     scanf("%[^\n]", bufferexpressao);
     
     lista* l = paraPosfixo(bufferexpressao);
     if(l!= NULL) {
+        printf("Expressao posfixa = ");
         printLista(l);
+        valor = avaliarPosfixo(l);
+        printf("valor da expressao = %d\n", valor);
         freeLista(l);
     }
 

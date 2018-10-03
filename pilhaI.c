@@ -60,3 +60,10 @@ int pilhaVaziaI(pilhaI * p) {
     }
     return 0;
 }
+
+void freePilhaI(pilhaI* p) {
+    while(lerTopoI(p) != VAZIO) {
+        desempilharI(p);
+    }
+    free(p);
+}
